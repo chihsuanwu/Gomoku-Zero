@@ -1,4 +1,5 @@
 import tensorflow as tf
+import random
 
 
 class Network(object):
@@ -128,16 +129,20 @@ class Network(object):
     # Save/Load network.
     def save(self, path='net/nn'):
         tf.train.Saver().save(self.sess, path)
+        print('Saved network to ' + path)
 
     def load(self, path='net/nn'):
         tf.train.Saver().restore(self.sess, path)
+        print('Finish loading network from ' + path)
 
     def output_policy(self, input):
-        prob = self.sess.run(self.policy_output, feed_dict={self.input: input})
+        prob = self.sess.run(self.policy_output,
+                             feed_dict={self.input: [input]})
         return prob.reshape([226])
 
     def output_value(self, input):
-        return self.sess.run(self.value_output, feed_dict={self.input: input})[0][0]
+        return self.sess.run(self.value_output,
+                             feed_dict={self.input: [input]})[0][0]
 
     def display_network(self, input):
         summ = self.sess.run(self.merged, {self.input: input,
@@ -150,11 +155,14 @@ def main():
     net = Network()
     net.set_up()
     net.init_var()
-    input = [[[[0]*5]*15]*15]
+    input = [[[random.randint(0, 1) for _ in range(5)]
+             for _ in range(15)]
+             for _ in range(15)]
     print(input)
     print(net.output_policy(input))
     print(net.output_value(input))
     net.display_network(input)
+    net.save()
 
 
 if __name__ == '__main__':
