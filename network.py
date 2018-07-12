@@ -145,7 +145,7 @@ class Network(object):
                              feed_dict={self.input: [input]})[0][0]
 
     def display_network(self, input):
-        summ = self.sess.run(self.merged, {self.input: input,
+        summ = self.sess.run(self.merged, {self.input: [input],
                                            self.policy: [[0]*226],
                                            self.value: [[0]]})
         self.train_writer.add_summary(summ, 0)

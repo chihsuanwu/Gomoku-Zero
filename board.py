@@ -1,5 +1,5 @@
 class Board(object):
-    """docstring for Board"""
+    # Gomoku board
     BOARD_DIMEN = 15
     EMPTY = 0
     BLACK = 1
@@ -17,6 +17,13 @@ class Board(object):
     def who_turn(self):
         return self.BLACK if self._move % 2 == 0 else self.WHITE
 
+    # Return data that going to feed into network.
+    # There are 5 feature maps:
+    # 1: Black's stone
+    # 2: White's stone
+    # 3: Empty position
+    # 4: 1 if black's turn else 0
+    # 4: 1 if white's turn else 0
     def get_data_for_network(self):
         data = []
         for row in range(self.BOARD_DIMEN):
@@ -48,6 +55,10 @@ class Board(object):
         self._move += 1
         return self._check_win(row, col)
 
+    def is_legal_move(self, row, col):
+        return self._board[row][col] == self.EMPTY
+
+    # Check the current move five in a row.
     def _check_win(self, row, col):
         def _out_of_bound(row, col):
             return row < 0 or row > 14 or col < 0 or col > 14
@@ -73,6 +84,7 @@ class Board(object):
 
         return False
 
+    # Print board, for debug usage.
     def print_board(self):
         def _start_point(row, col):
             return ((row == 8 and col == 8) or
