@@ -12,6 +12,7 @@ def main():
         if tree.play(row, col) != bd.Board.NOTHING:
             tree.restart()
         tree.print_board()
+        print("%c[%d;%df" % (0x1B, 0, 0), end='')
 
 
 if __name__ == '__main__':

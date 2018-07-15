@@ -51,6 +51,7 @@ class Node(object):
         best = -1
         best_value = 0.0
         for idx, child in enumerate(self._children):
+            # Get win rate.
             if type(child) is Node:
                 if child._visit_count > 0:
                     win_rate = child._get_win_rate()
@@ -60,6 +61,7 @@ class Node(object):
                     child_visit = 0
                 child_policy = child._nn_polivy
             else:
+                # Using current winrate if not append yet.
                 win_rate = 1 - self._nn_value
                 child_visit = 0
                 child_policy = child[2]
@@ -89,6 +91,7 @@ class UctTree(object):
 
         self.restart()
 
+    # Create a new node and return it.
     def _create_node(self, move, row, col, cur_policy, board, parent):
         data = board.get_data_for_network()
         policy = self._network.output_policy(data)
@@ -110,6 +113,7 @@ class UctTree(object):
             leaf_node = self._select_until_leaf(mcts_board)
             self._back_prop(leaf_node, mcts_board)
 
+    # Keep select best child until reach leaf, and return it.
     def _select_until_leaf(self, board):
         cur_node = self._cur_node
         while True:
@@ -147,18 +151,18 @@ class UctTree(object):
 
     def get_best_move(self):
         best = 0
-        row = -1
-        col = -1
+        best_child = None
+
         for child in self._cur_node._children:
             if type(child) is Node:
-                print('row: {}, col: {}, visit: {}, winrate: {}'
-                      .format(child._row, child._col,
-                              child._visit_count, child._get_win_rate()))
                 if child._visit_count > best:
                     best = child._visit_count
-                    row = child._row
-                    col = child._col
-        return row, col
+                    best_child = child
+
+        print('row: {}, col: {}, visit: {}, winrate: {}'
+              .format(best_child._row, best_child._col,
+                      best_child._visit_count, best_child._get_win_rate()))
+        return best_child._row, best_child._col
 
     def print_board(self):
         self._board.print_board()
