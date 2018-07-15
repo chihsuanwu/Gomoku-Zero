@@ -46,14 +46,29 @@ class Board(object):
             data.append(sub_data)
         return data
 
+    # Play at [row, col], and return True if is winning.
     def play(self, row, col):
-        if (self._board[row][col] != self.EMPTY):
-            print('ERROR: play at invalid position.')
-            return
+        if row == -1 and col == -1:
+            print('PASS move.')
+            self._move += 1
+            return False
+        else:
+            if (self._board[row][col] != self.EMPTY):
+                print('ERROR: play at invalid position.')
+                return
 
-        self._board[row][col] = self.who_turn()
-        self._move += 1
-        return self._check_win(row, col)
+            self._board[row][col] = self.who_turn()
+            self._move += 1
+            return self._check_win(row, col)
+
+    # NOTE: this function doesn't check if [row, col]
+    # is correct undo position or not because
+    # this function will be calling frequency during searching,
+    # please make sure [row, col] is correct undo position
+    # when calling this function.
+    def undo(self, row, col):
+        self._board[row][col] = self.EMPTY
+        self._move -= 1
 
     def is_legal_move(self, row, col):
         return self._board[row][col] == self.EMPTY
