@@ -1,4 +1,5 @@
 import uct_tree
+import board as bd
 
 
 def main():
@@ -8,7 +9,8 @@ def main():
         tree.mcts_visit(mc)
         print('Finish mcts')
         row, col = tree.get_best_move()
-        tree.play(int(row), int(col))
+        if tree.play(row, col) != bd.Board.NOTHING:
+            tree.restart()
         tree.print_board()
 
 

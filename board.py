@@ -54,7 +54,7 @@ class Board(object):
     # Play at [row, col], and return game status.
     def play(self, row, col):
         if row == -1 and col == -1:
-            print('PASS move.')
+            # Pass.
             if self._prev_pass:
                 return self.TIE
             self._prev_pass = True

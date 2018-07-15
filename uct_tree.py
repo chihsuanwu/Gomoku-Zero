@@ -1,5 +1,5 @@
 import network as net
-import board
+import board as bd
 import copy
 
 
@@ -83,7 +83,7 @@ class UctTree(object):
     def __init__(self, net_path='nn/net'):
         self._network = net.Network()
         self._network.set_up()
-        self._board = board.Board()
+        self._board = bd.Board()
         if net_path is not None:
             self._network.load(net_path)
 
@@ -121,13 +121,17 @@ class UctTree(object):
                                              next_node[0], next_node[1],
                                              next_node[2], board, cur_node)
                 cur_node._children[next_node_idx] = new_node
-                if someone_win:
+                if someone_win == board.WIN:
                     new_node._nn_value = 1.0
+                elif someone_win == board.TIE:
+                    new_node._nn_value = 0.0
+                elif someone_win == board.LOSE:
+                    new_node._nn_value = -1.0
                 return new_node
 
             someone_win = board.play(next_node._row, next_node._col)
             # Stop if someone win.
-            if someone_win:
+            if someone_win != board.NOTHING:
                 return next_node
 
             cur_node = next_node
@@ -147,8 +151,9 @@ class UctTree(object):
         col = -1
         for child in self._cur_node._children:
             if type(child) is Node:
-                print('row: {}, col: {}, visit: {}'.format(child._row,
-                      child._col, child._visit_count))
+                print('row: {}, col: {}, visit: {}, winrate: {}'
+                      .format(child._row, child._col,
+                              child._visit_count, child._get_win_rate()))
                 if child._visit_count > best:
                     best = child._visit_count
                     row = child._row
@@ -160,19 +165,19 @@ class UctTree(object):
 
     # Play at [row, col], if child node not exist then create it
     # and move '_cur_node' to child node.
-    # Return True if this move win the game.
+    # Return game status.
     def play(self, row, col):
         win = self._board.play(row, col)
-        if win:
-            print('WIN')
-            return True
+        if win != bd.Board.NOTHING:
+            print('End game')
+            return win
 
         # Find the next move's child.
         for idx, child in enumerate(self._cur_node._children):
             if type(child) is Node:
                 if child._row == row and child._col == col:
                     self._cur_node = child
-                    return False
+                    return win
             else:
                 if child[0] == row and child[1] == col:
                     new_node = self._create_node(self._cur_node._move + 1,
@@ -182,26 +187,9 @@ class UctTree(object):
                     self._cur_node._children[idx] = new_node
                     self._cur_node = new_node
 
-                    return False
+                    return win
 
         print('ERROR')
 
     def predict_current(self):
         return self._network.output_value(self._board.get_data_for_network())
-
-
-def main():
-    tree = UctTree('net/nn')
-    mc = 1000
-    while 1:
-        tree.mcts_visit(mc)
-        print('Finish mcts')
-        tree.get_best_move()
-        row, col, mc = map(int, input('Row Col: ').split())
-        tree.play(int(row), int(col))
-        tree.print_board()
-        print(tree.predict_current())
-
-
-if __name__ == '__main__':
-    main()
