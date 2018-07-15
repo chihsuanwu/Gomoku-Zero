@@ -6,6 +6,10 @@ class Board(object):
     WHITE = 2
     PASS = -1
     DIR_4 = [[0, 1], [1, 0], [1, 1], [1, -1]]
+    WIN = 1
+    LOSE = 2
+    TIE = 3
+    NOTHING = 0
 
     def __init__(self):
         self.clear()
@@ -13,6 +17,7 @@ class Board(object):
     def clear(self):
         self._board = [[self.EMPTY]*15 for _ in range(15)]
         self._move = 0
+        self._prev_pass = False
 
     def who_turn(self):
         return self.BLACK if self._move % 2 == 0 else self.WHITE
@@ -46,17 +51,21 @@ class Board(object):
             data.append(sub_data)
         return data
 
-    # Play at [row, col], and return True if is winning.
+    # Play at [row, col], and return game status.
     def play(self, row, col):
         if row == -1 and col == -1:
             print('PASS move.')
+            if self._prev_pass:
+                return self.TIE
+            self._prev_pass = True
             self._move += 1
-            return False
+            return self.NOTHING
         else:
             if (self._board[row][col] != self.EMPTY):
                 print('ERROR: play at invalid position.')
-                return
+                return self.NOTHING
 
+            self._prev_pass = False
             self._board[row][col] = self.who_turn()
             self._move += 1
             return self._check_win(row, col)
@@ -95,9 +104,9 @@ class Board(object):
                     count += 1
 
             if count >= 4:
-                return True
+                return self.WIN
 
-        return False
+        return self.NOTHING
 
     # Print board, for debug usage.
     def print_board(self):
@@ -174,21 +183,3 @@ class Board(object):
                     board += '\n'
 
         print(board)
-
-
-def main():
-    board = Board()
-
-    while 1:
-        row, col = map(int, input('Row Col: ').split())
-        result = board.play(int(row), int(col))
-        board.print_board()
-        print(result)
-        print(board.get_data_for_network())
-        if (result):
-            print('Win')
-            board.clear()
-
-
-if __name__ == '__main__':
-    main()

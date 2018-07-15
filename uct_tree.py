@@ -142,10 +142,18 @@ class UctTree(object):
         cur_node.update(result_value)
 
     def get_best_move(self):
+        best = 0
+        row = -1
+        col = -1
         for child in self._cur_node._children:
             if type(child) is Node:
                 print('row: {}, col: {}, visit: {}'.format(child._row,
                       child._col, child._visit_count))
+                if child._visit_count > best:
+                    best = child._visit_count
+                    row = child._row
+                    col = child._col
+        return row, col
 
     def print_board(self):
         self._board.print_board()
@@ -184,15 +192,15 @@ class UctTree(object):
 
 def main():
     tree = UctTree('net/nn')
+    mc = 1000
     while 1:
-        tree.mcts_visit(20)
+        tree.mcts_visit(mc)
         print('Finish mcts')
         tree.get_best_move()
-        row, col = map(int, input('Row Col: ').split())
+        row, col, mc = map(int, input('Row Col: ').split())
         tree.play(int(row), int(col))
         tree.print_board()
         print(tree.predict_current())
-
 
 
 if __name__ == '__main__':
